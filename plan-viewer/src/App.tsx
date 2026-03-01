@@ -3,7 +3,11 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import PlanViewer from './components/PlanViewer'
 import ActionLog from './components/ActionLog'
+import AnalysisPanel from './components/AnalysisPanel'
 import { LogEntry } from './types'
+import { analyzeStructure } from './services/geminiService'
+
+const BASE_URL = import.meta.env.BASE_URL
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -14,6 +18,11 @@ function App() {
 
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [nextId, setNextId] = useState(1)
+
+  // AI Analysis state
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [aiAnalysisText, setAiAnalysisText] = useState<string | null>(null)
+  const [currentPlanImage, setCurrentPlanImage] = useState<string | null>(null)
 
   // Apply theme to document
   document.documentElement.setAttribute('data-theme', theme)
@@ -48,12 +57,55 @@ function App() {
     setLogs([])
   }, [])
 
+  const handleAnalyze = useCallback(async () => {
+    if (isAnalyzing) return
+
+    setIsAnalyzing(true)
+    addLog('AI Analysis', '🤖 AI Structural Analysis requested...')
+
+    try {
+      const imageUrl = `${BASE_URL}foundation-plan.png`
+      const result = await analyzeStructure(imageUrl)
+
+      if (result.annotatedImageUrl) {
+        setCurrentPlanImage(result.annotatedImageUrl)
+      }
+      if (result.structuralAnalysisSummary) {
+        setAiAnalysisText(result.structuralAnalysisSummary)
+      }
+
+      addLog('AI Analysis', '✅ AI Analysis complete and applied.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      addLog('AI Analysis', `❌ AI Analysis failed: ${message}`)
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }, [isAnalyzing, addLog])
+
+  const closeAnalysisPanel = useCallback(() => {
+    setAiAnalysisText(null)
+  }, [])
+
   return (
     <div className="app">
-      <Header theme={theme} toggleTheme={toggleTheme} />
+      <Header
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onAnalyze={handleAnalyze}
+        isAnalyzing={isAnalyzing}
+      />
       <div className="main-content">
-        <PlanViewer addLog={addLog} />
-        <ActionLog logs={logs} onClear={clearLogs} />
+        <PlanViewer
+          addLog={addLog}
+          currentPlanImage={currentPlanImage}
+          isAnalyzing={isAnalyzing}
+        />
+        {aiAnalysisText ? (
+          <AnalysisPanel text={aiAnalysisText} onClose={closeAnalysisPanel} />
+        ) : (
+          <ActionLog logs={logs} onClear={clearLogs} />
+        )}
       </div>
       <Footer />
     </div>
