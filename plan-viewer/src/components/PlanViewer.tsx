@@ -129,7 +129,7 @@ function PlanViewer({ addLog }: PlanViewerProps) {
     const pos = positionRef.current
     const dx = Math.round(pos.x - (panStart.current.x !== 0 ? pos.x : 0))
     const dy = Math.round(pos.y - (panStart.current.y !== 0 ? pos.y : 0))
-    addLog('Pan', `↔️ Position: (${Math.round(pos.x)}, ${Math.round(pos.y)})`)
+    addLog('Pan', `↔️ x: ${Math.round(pos.x)}, y: ${Math.round(pos.y)}`)
   }, [isPanning, addLog])
 
   // Global mouse up to handle drag outside viewer
@@ -138,7 +138,7 @@ function PlanViewer({ addLog }: PlanViewerProps) {
       if (isPanning) {
         setIsPanning(false)
         const pos = positionRef.current
-        addLog('Pan', `↔️ Position: (${Math.round(pos.x)}, ${Math.round(pos.y)})`)
+        addLog('Pan', `↔️ x: ${Math.round(pos.x)}, y: ${Math.round(pos.y)}`)
       }
     }
     window.addEventListener('mouseup', handleGlobalMouseUp)
@@ -158,7 +158,7 @@ function PlanViewer({ addLog }: PlanViewerProps) {
             🔍 Zoom: {scale.toFixed(2)}x
           </span>
           <span className="toolbar-badge">
-            📍 ({Math.round(position.x)}, {Math.round(position.y)})
+            📍 x: {Math.round(position.x)}, y: {Math.round(position.y)}
           </span>
         </div>
         <span className="toolbar-hint">
