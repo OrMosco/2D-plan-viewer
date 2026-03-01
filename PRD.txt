@@ -3,44 +3,30 @@
 **Duration:** 3 hours
 
 ---
+At the end i will want to share this with Github pages.
 
-## Overview
-[Brief description of the feature or project]
 
-## Objectives
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
-
-## Features
-### Feature 1
-- Description
-- Acceptance Criteria
-
-### Feature 2
-- Description
-- Acceptance Criteria
-
-## Technical Requirements
-- Frontend: [Framework/Library]
-- Backend: [Language/Framework]
-- Database: [Type]
-- APIs: [List endpoints]
-
-## Deliverables
-- [ ] Code implementation
-- [ ] Unit tests
-- [ ] Documentation
-
-## Constraints
-- Time: 3 hours
-- [Other constraints]
-
-## Success Criteria
-- All features implemented and tested
-- Code follows best practices
-- Documentation complete
-
----
-**Date Created:** [Date]
-**Status:** In Progress
+This is the 1st Assignment, Write a PRD for this. i provided an png image of the building plan
+Assignment 1 (90 mintus):
+Build a simple 2D plan viewer using React (or another frontend framework of your choice).
+Frontend only (no backend required).
+Functional Requirements
+Viewer
+● Display a provided plan image (attached below) , inside a viewer area.
+● Zoom in/out using mouse wheel / trackpad scroll:
+○ Zoom must be centered on the cursor position.
+○ Apply reasonable limits (e.g., min 0.25x, max 5x).
+● Pan the image using click-and-drag:
+○ Mouse down + drag moves the image.
+○ Releasing the mouse stops panning.
+● Double click resets the view by centering the image in the viewer.
+Action Log
+● Display an action log table next to the viewer (side-by-side layout).
+● The table must log user interactions in real time, including:
+○ Zoom in / zoom out
+○ Pan (start + end, or a single “pan” entry with delta)
+○ Center reset (double click)
+For each log entry include at minimum:
+● Timestamp
+● Action type
+● Bonus task - Details (e.g., zoom level, pan delta, center/reset)
