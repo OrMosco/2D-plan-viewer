@@ -1,0 +1,30 @@
+{
+  "name": "file-management-service",
+  "version": "1.0.0",
+  "description": "AWS Serverless file management service – multi-project, multi-type file upload/download",
+  "main": "src/handlers/upload.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "lint": "eslint src/**/*.js",
+    "deploy": "serverless deploy",
+    "deploy:prod": "serverless deploy --stage prod",
+    "local": "serverless offline"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.515.0",
+    "@aws-sdk/client-s3": "^3.515.0",
+    "@aws-sdk/lib-dynamodb": "^3.515.0",
+    "@aws-sdk/s3-request-presigner": "^3.515.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,224 @@
+service: file-management-service
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, "us-east-1"}
+  stage: ${opt:stage, "dev"}
+  memorySize: 256
+  timeout: 29
+
+  environment:
+    FILES_TABLE: !Ref FilesTable
+    FILES_BUCKET: !Ref FilesBucket
+    PRESIGNED_URL_TTL: "900" # 15 minutes in seconds
+    STAGE: ${self:provider.stage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+          Resource:
+            - !GetAtt FilesTable.Arn
+            - !Sub "${FilesTable.Arn}/index/*"
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource: !Sub "${FilesBucket.Arn}/*"
+
+  tracing:
+    lambda: true
+    apiGateway: true
+
+  logs:
+    restApi:
+      accessLogging: true
+      executionLogging: true
+      level: INFO
+      fullExecutionData: false
+
+plugins:
+  - serverless-offline
+
+functions:
+  uploadFile:
+    handler: src/handlers/upload.handler
+    description: Generate a pre-signed S3 PUT URL and store file metadata
+    events:
+      - http:
+          path: /projects/{projectId}/files
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref CognitoAuthorizer
+
+  listFiles:
+    handler: src/handlers/list.handler
+    description: List files for a project, optionally filtered by file type
+    events:
+      - http:
+          path: /projects/{projectId}/files
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref CognitoAuthorizer
+
+  downloadFile:
+    handler: src/handlers/download.handler
+    description: Generate a pre-signed S3 GET URL for a specific file
+    events:
+      - http:
+          path: /projects/{projectId}/files/{fileId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref CognitoAuthorizer
+
+  deleteFile:
+    handler: src/handlers/delete.handler
+    description: Delete a file from S3 and remove its metadata from DynamoDB
+    events:
+      - http:
+          path: /projects/{projectId}/files/{fileId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref CognitoAuthorizer
+
+resources:
+  Resources:
+    FilesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-files-${self:provider.stage}
+        VersioningConfiguration:
+          Status: Enabled
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: aws:kms
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - PUT
+                - GET
+              AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+              MaxAge: 3000
+        LifecycleConfiguration:
+          Rules:
+            - Id: TransitionToIntelligentTiering
+              Status: Enabled
+              Transitions:
+                - TransitionInDays: 30
+                  StorageClass: INTELLIGENT_TIERING
+
+    FilesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-files-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        SSESpecification:
+          SSEEnabled: true
+        AttributeDefinitions:
+          - AttributeName: projectId
+            AttributeType: S
+          - AttributeName: fileId
+            AttributeType: S
+          - AttributeName: fileExtension
+            AttributeType: S
+          - AttributeName: uploadedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: projectId
+            KeyType: HASH
+          - AttributeName: fileId
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: fileExtension-uploadedAt-index
+            KeySchema:
+              - AttributeName: fileExtension
+                KeyType: HASH
+              - AttributeName: uploadedAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-users-${self:provider.stage}
+        AutoVerifiedAttributes:
+          - email
+        UsernameAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireUppercase: true
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: false
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-client-${self:provider.stage}
+        UserPoolId: !Ref CognitoUserPool
+        ExplicitAuthFlows:
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        GenerateSecret: false
+
+    CognitoAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId: !Ref ApiGatewayRestApi
+        ProviderARNs:
+          - !GetAtt CognitoUserPool.Arn
+
+  Outputs:
+    FilesBucketName:
+      Value: !Ref FilesBucket
+      Description: S3 bucket for file storage
+
+    FilesTableName:
+      Value: !Ref FilesTable
+      Description: DynamoDB table for file metadata
+
+    UserPoolId:
+      Value: !Ref CognitoUserPool
+      Description: Cognito User Pool ID
+
+    UserPoolClientId:
+      Value: !Ref CognitoUserPoolClient
+      Description: Cognito User Pool Client ID
+
+    ServiceEndpoint:
+      Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}"
+      Description: API Gateway endpoint URL
