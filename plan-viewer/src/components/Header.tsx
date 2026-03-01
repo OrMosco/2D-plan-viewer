@@ -15,8 +15,6 @@ function Header({ theme, toggleTheme }: HeaderProps) {
       </div>
 
       <nav className="header-nav">
-        <button className="nav-link hide-mobile">📐 Viewer</button>
-        <button className="nav-link hide-mobile">📋 Log</button>
         <a
           className="nav-link"
           href="https://github.com/OrMosco/2D-plan-viewer"
