@@ -364,7 +364,7 @@ function handleZoom(wheelDelta, cursorX, cursorY) {
 | **Setup** | 10 min | Create React app, install dependencies, project structure |
 | **Viewer Core** | 35 min | Image display, zoom (with cursor centering), pan, reset |
 | **Action Log** | 20 min | Log component, state management, event logging |
-| **Styling & Theme** | 15 min | Pink gradients, header/footer, light/dark mode toggle |
+| **Styling & Theme** | 15 min | Blue/white gradients, header/footer, light/dark mode toggle |
 | **Polish & Deploy** | 10 min | Responsive tweaks, testing, GitHub Pages deployment |
 | **Total** | **90 min** | |
 
