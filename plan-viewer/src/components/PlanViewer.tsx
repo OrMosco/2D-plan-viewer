@@ -3,8 +3,6 @@ import { LogEntry } from '../types'
 
 interface PlanViewerProps {
   addLog: (action: LogEntry['action'], details: string) => void
-  currentPlanImage: string | null
-  isAnalyzing: boolean
 }
 
 const MIN_ZOOM = 0.25
@@ -12,7 +10,7 @@ const MAX_ZOOM = 5
 const ZOOM_SENSITIVITY = 0.001
 const BASE_URL = import.meta.env.BASE_URL
 
-function PlanViewer({ addLog, currentPlanImage, isAnalyzing }: PlanViewerProps) {
+function PlanViewer({ addLog }: PlanViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -152,8 +150,6 @@ function PlanViewer({ addLog, currentPlanImage, isAnalyzing }: PlanViewerProps) 
     resetView()
   }, [resetView])
 
-  const imageSrc = currentPlanImage || `${BASE_URL}foundation-plan.png`;
-
   return (
     <div className="viewer-container">
       <div className="viewer-toolbar">
@@ -164,11 +160,6 @@ function PlanViewer({ addLog, currentPlanImage, isAnalyzing }: PlanViewerProps) 
           <span className="toolbar-badge">
             📍 x: {Math.round(position.x)}, y: {Math.round(position.y)}
           </span>
-          {currentPlanImage && (
-            <span className="toolbar-badge ai-badge">
-              🤖 AI Annotated
-            </span>
-          )}
         </div>
         <span className="toolbar-hint">
           💡 Scroll to zoom • Drag to pan • Double-click to reset
@@ -184,15 +175,9 @@ function PlanViewer({ addLog, currentPlanImage, isAnalyzing }: PlanViewerProps) 
         onDoubleClick={handleDoubleClick}
         style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
       >
-        {isAnalyzing && (
-          <div className="viewer-loading-overlay">
-            <div className="viewer-loading-spinner" />
-            <div className="viewer-loading-text">🤖 Analyzing structure…</div>
-          </div>
-        )}
         <img
           ref={imgRef}
-          src={imageSrc}
+          src={`${BASE_URL}foundation-plan.png`}
           alt="Foundation Plan"
           onLoad={handleImageLoad}
           style={{

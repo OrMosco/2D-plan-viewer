@@ -11,7 +11,6 @@ function getActionClass(action: LogEntry['action']): string {
     case 'Zoom Out': return 'zoom-out'
     case 'Pan': return 'pan'
     case 'Reset': return 'reset'
-    case 'AI Analysis': return 'ai-analysis'
     default: return ''
   }
 }
@@ -22,7 +21,6 @@ function getActionEmoji(action: LogEntry['action']): string {
     case 'Zoom Out': return '🔎'
     case 'Pan': return '↔️'
     case 'Reset': return '🔄'
-    case 'AI Analysis': return '🤖'
     default: return '📌'
   }
 }

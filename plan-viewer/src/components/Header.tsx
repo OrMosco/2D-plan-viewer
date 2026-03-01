@@ -1,11 +1,9 @@
 interface HeaderProps {
   theme: 'light' | 'dark'
   toggleTheme: () => void
-  onAnalyze: () => void
-  isAnalyzing: boolean
 }
 
-function Header({ theme, toggleTheme, onAnalyze, isAnalyzing }: HeaderProps) {
+function Header({ theme, toggleTheme }: HeaderProps) {
   return (
     <header className="header">
       <div className="header-left">
@@ -17,21 +15,6 @@ function Header({ theme, toggleTheme, onAnalyze, isAnalyzing }: HeaderProps) {
       </div>
 
       <nav className="header-nav">
-        <button
-          className="ai-analyze-btn"
-          onClick={onAnalyze}
-          disabled={isAnalyzing}
-          title="Run AI Structural Analysis on the plan"
-        >
-          {isAnalyzing ? (
-            <>
-              <span className="ai-spinner" />
-              Analyzing…
-            </>
-          ) : (
-            <>✨ AI Analyze Structure</>
-          )}
-        </button>
         <a
           className="nav-link"
           href="https://github.com/OrMosco/2D-plan-viewer"
