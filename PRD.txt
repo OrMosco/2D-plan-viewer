@@ -1,0 +1,46 @@
+# Product Requirements Document (PRD)
+## Spacial.io - Full Stack Developer Task
+**Duration:** 3 hours
+
+---
+
+## Overview
+[Brief description of the feature or project]
+
+## Objectives
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Features
+### Feature 1
+- Description
+- Acceptance Criteria
+
+### Feature 2
+- Description
+- Acceptance Criteria
+
+## Technical Requirements
+- Frontend: [Framework/Library]
+- Backend: [Language/Framework]
+- Database: [Type]
+- APIs: [List endpoints]
+
+## Deliverables
+- [ ] Code implementation
+- [ ] Unit tests
+- [ ] Documentation
+
+## Constraints
+- Time: 3 hours
+- [Other constraints]
+
+## Success Criteria
+- All features implemented and tested
+- Code follows best practices
+- Documentation complete
+
+---
+**Date Created:** [Date]
+**Status:** In Progress
